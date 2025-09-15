@@ -1,4 +1,4 @@
-name: Xtreme Download Manager
+name: Create GitHub release
 
 on:
   push:
@@ -34,4 +34,6 @@ jobs:
           tag: ${{ github.ref_name }}
           name: "Release ${{ github.ref_name }}"
           body: "Automated release for XDM Chrome extension."
-          files: ${{ env.ZIP_NAME }}
+          artifacts: ${{ env.ZIP_NAME }}
+          # Optional: uncomment if you need a PAT to avoid 403
+          # token: ${{ secrets.GH_TOKEN }}
