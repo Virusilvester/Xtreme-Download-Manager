@@ -1,0 +1,45 @@
+name: Chrome Extension Release
+
+on:
+  push:
+    tags:
+      - 'v*'   # Trigger on tags like v1.0.0
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies (optional)
+        run: npm install
+
+      - name: Validate manifest
+        run: |
+          if ! jq -e . manifest.json; then
+            echo "Invalid manifest.json"
+            exit 1
+          fi
+
+      - name: Build zip for Chrome
+        run: |
+          ZIP_NAME="xdm-extension-${GITHUB_REF_NAME}.zip"
+          zip -r $ZIP_NAME * -x '*.git*' -x '*.github*'
+          echo "Built $ZIP_NAME"
+          echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
+
+      - name: Create GitHub release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.ref_name }}
+          name: "Release ${{ github.ref_name }}"
+          body: "Automated release for XDM Chrome extension."
+          files: ${{ env.ZIP_NAME }}
