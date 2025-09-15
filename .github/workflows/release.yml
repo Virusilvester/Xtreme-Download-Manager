@@ -3,8 +3,8 @@ name: Xtreme Download Manager
 on:
   push:
     tags:
-      - 'v*'   # Trigger on tags like v1.0.0
-  workflow_dispatch:  # Allow manual triggering
+      - 'v*'
+  workflow_dispatch:
 
 jobs:
   build-release:
@@ -13,14 +13,6 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-
-      - name: Install dependencies (optional)
-        run: npm install
 
       - name: Validate manifest
         run: |
