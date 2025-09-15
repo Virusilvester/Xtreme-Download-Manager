@@ -1,4 +1,4 @@
-name: Chrome Extension Release
+name: Xtreme Download Manager
 
 on:
   push:
