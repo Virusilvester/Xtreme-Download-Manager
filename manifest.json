@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "Xtreme Download Manager",
+  "description": "XDM is an open source download manager",
+  "version": "3.0",
+  "minimum_chrome_version": "88.0",
+
+  "icons": {
+    "48": "icon.png",
+    "128": "icon-128.png"
+  },
+
+  "background": {
+    "service_worker": "bg.js"
+  },
+
+  "action": {
+    "default_icon": "icon.png"
+  },
+
+  "permissions": [
+    "activeTab",
+    "cookies",
+    "contextMenus",
+    "webRequest",
+    "downloads",
+    "alarms",
+    "scripting",
+    "commands"
+  ],
+
+  "host_permissions": [
+    "*://*/*"
+  ],
+
+  "commands": {
+    "toggle-monitoring": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+E",
+        "mac": "Command+Shift+E"
+      },
+      "description": "Toggle monitoring"
+    }
+  }
+}
