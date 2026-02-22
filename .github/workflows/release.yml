@@ -9,20 +9,24 @@ on:
 jobs:
   build-release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Validate manifest
         run: |
-          if ! jq -e . manifest.json; then
+          set -euo pipefail
+          if ! jq -e . manifest.json >/dev/null; then
             echo "Invalid manifest.json"
             exit 1
           fi
 
       - name: Build zip for Chrome
         run: |
+          set -euo pipefail
           ZIP_NAME="xdm-extension-${GITHUB_REF_NAME}.zip"
           zip -r "$ZIP_NAME" * -x '*.git*' -x '*.github*'
           echo "Built $ZIP_NAME"
@@ -35,4 +39,15 @@ jobs:
           name: "Release ${{ github.ref_name }}"
           body: "Automated release for XDM Chrome extension."
           artifacts: ${{ env.ZIP_NAME }}
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload to Chrome Web Store (optional)
+        if: ${{ secrets.CHROME_EXTENSION_ID != '' && secrets.CHROME_CLIENT_ID != '' && secrets.CHROME_CLIENT_SECRET != '' && secrets.CHROME_REFRESH_TOKEN != '' }}
+        uses: mnao305/chrome-extension-upload@v5
+        with:
+          file-path: ${{ env.ZIP_NAME }}
+          extension-id: ${{ secrets.CHROME_EXTENSION_ID }}
+          client-id: ${{ secrets.CHROME_CLIENT_ID }}
+          client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
+          refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
+          publish: true

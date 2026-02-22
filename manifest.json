@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Xtreme Download Manager",
   "description": "XDM is an open source download manager",
-  "version": "3.0",
+  "version": "3.1",
   "minimum_chrome_version": "88.0",
 
   "icons": {
@@ -15,7 +15,9 @@
   },
 
   "action": {
-    "default_icon": "icon.png"
+    "default_icon": "icon.png",
+    "default_popup": "status.html",
+    "default_title": "XDM Browser Monitor"
   },
 
   "permissions": [
@@ -26,7 +28,8 @@
     "downloads",
     "alarms",
     "scripting",
-    "commands"
+    "commands",
+    "storage"
   ],
 
   "host_permissions": [

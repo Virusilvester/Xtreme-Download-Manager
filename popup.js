@@ -1,6 +1,11 @@
 window.onload = function () {
     document.getElementById('content').style.display = 'none';
     chrome.runtime.sendMessage({ type: "stat" }, function (response) {
+        if (!response) {
+            document.getElementById("chk").checked = false;
+            return;
+        }
+
         document.getElementById("chk").checked = !response.isDisabled;
 
         var button = document.getElementById('clear');
@@ -14,12 +19,12 @@ window.onload = function () {
             alert("Please select desired format in web player")
         });
 
-        if (response.list.length > 0) {
+        if ((response.list || []).length > 0) {
             document.getElementById('content').style.display = 'block';
             //return;
         }
 
-        renderList(response.list);
+        renderList(response.list || []);
 
     });
 
