@@ -11,6 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      CWS_UPLOAD: ${{ (secrets.CHROME_EXTENSION_ID != '' && secrets.CHROME_CLIENT_ID != '' && secrets.CHROME_CLIENT_SECRET != '' && secrets.CHROME_REFRESH_TOKEN != '') && '1' || '0' }}
+      CRX_PRIVATE_KEY_B64: ${{ secrets.CRX_PRIVATE_KEY_B64 }}
 
     steps:
       - name: Checkout repo
@@ -24,13 +27,39 @@ jobs:
             exit 1
           fi
 
+      - name: Prepare extension directory
+        run: |
+          set -euo pipefail
+          rm -rf dist
+          mkdir -p dist/extension
+          rsync -a --delete \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'dist' \
+            ./ dist/extension/
+
       - name: Build zip for Chrome
         run: |
           set -euo pipefail
           ZIP_NAME="xdm-extension-${GITHUB_REF_NAME}.zip"
-          zip -r "$ZIP_NAME" * -x '*.git*' -x '*.github*'
+          (cd dist/extension && zip -r -9 "../../$ZIP_NAME" .)
           echo "Built $ZIP_NAME"
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
+
+      - name: Build .crx artifact
+        run: |
+          set -euo pipefail
+          CRX_NAME="xdm-extension-${GITHUB_REF_NAME}.crx"
+          PEM_PATH="dist/xdm-extension.pem"
+
+          if [ -n "${CRX_PRIVATE_KEY_B64:-}" ]; then
+            echo "$CRX_PRIVATE_KEY_B64" | base64 -d > "$PEM_PATH"
+          fi
+
+          npx --yes crx3 -p "$PEM_PATH" -o "$CRX_NAME" dist/extension
+
+          echo "Built $CRX_NAME"
+          echo "CRX_NAME=$CRX_NAME" >> $GITHUB_ENV
 
       - name: Create GitHub release
         uses: ncipollo/release-action@v1
@@ -38,11 +67,11 @@ jobs:
           tag: ${{ github.ref_name }}
           name: "Release ${{ github.ref_name }}"
           body: "Automated release for XDM Chrome extension."
-          artifacts: ${{ env.ZIP_NAME }}
+          artifacts: ${{ env.ZIP_NAME }},${{ env.CRX_NAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload to Chrome Web Store (optional)
-        if: ${{ secrets.CHROME_EXTENSION_ID != '' && secrets.CHROME_CLIENT_ID != '' && secrets.CHROME_CLIENT_SECRET != '' && secrets.CHROME_REFRESH_TOKEN != '' }}
+        if: ${{ env.CWS_UPLOAD == '1' }}
         uses: mnao305/chrome-extension-upload@v5
         with:
           file-path: ${{ env.ZIP_NAME }}

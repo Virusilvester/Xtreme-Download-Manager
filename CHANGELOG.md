@@ -10,6 +10,7 @@ and this project aims to follow [Semantic Versioning](https://semver.org/).
 ### Added
 - Toolbar popup wiring (`status.html`) and persisted “monitoring disabled” state via `chrome.storage.local`.
 - Optional Chrome Web Store upload/publish step in the GitHub Release workflow (runs only when required secrets are set).
+- GitHub Release workflow now builds a `.crx` artifact (signed using `CRX_PRIVATE_KEY_B64` when provided).
 
 ### Changed
 - Release workflow now uses `actions/checkout@v4` and `GITHUB_TOKEN` with `contents: write` permissions.
@@ -25,4 +26,3 @@ and this project aims to follow [Semantic Versioning](https://semver.org/).
 ### Added
 - Initial MV3 extension: service worker (`bg.js`), content script (`contentscript.js`), and popup UI (`status.html` + `popup.js`).
 - GitHub Actions workflow to build a Chrome-ready zip and attach it to a GitHub Release on tag pushes (`v*`).
-
